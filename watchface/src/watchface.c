@@ -20,6 +20,19 @@ void init() {
   // Add as child layer to be included in rendering
   layer_add_child(window_get_root_layer(window), 
     text_layer_get_layer(text_layer));
+  window_set_background_color(window, GColorBlack);
+
+  //Vibrations
+  int times = 3;
+  static const uint32_t const segments[] = { 200, 100, 400 };
+  if (times > 0){
+      VibePattern pat = {
+      .durations = segments,
+      .num_segments = ARRAY_LENGTH(segments),
+    };
+    vibes_enqueue_custom_pattern(pat);
+    times --;
+  }
 }
 
 void deinit() {
