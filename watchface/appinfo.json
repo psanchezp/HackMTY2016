@@ -1,0 +1,19 @@
+{
+  "uuid": "5199ff28-2a02-4df1-bc8b-3b797aa59da1",
+  "shortName": "watchface",
+  "longName": "watchface",
+  "companyName": "MakeAwesomeHappen",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
+  "enableMultiJS": true,
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
