@@ -22,8 +22,19 @@ void init() {
     text_layer_get_layer(text_layer));
   window_set_background_color(window, GColorBlack);
 
-  //Vibrations
-  int times = 3;
+  //Set click config
+   window_set_click_config_provider(window, ClickConfigProvider config_provider);
+}
+
+void deinit() {
+  // Destroy the Window
+  window_destroy(window);
+  // Destroy the TextLayer
+  text_layer_destroy(text_layer);
+}
+
+//Vibrations
+void vibrations(int times){
   static const uint32_t const segments[] = { 200, 100, 400 };
   if (times > 0){
       VibePattern pat = {
@@ -35,11 +46,14 @@ void init() {
   }
 }
 
-void deinit() {
-  // Destroy the Window
-  window_destroy(window);
-  // Destroy the TextLayer
-  text_layer_destroy(text_layer);
+void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+  vibrations(3);
+  Window *window = (Window *)context;
+}
+
+void config_provider(Window *window){
+  //single click
+  window_single_click_subscribe(BUTTON_ID_DONW, down_single_click_handler);
 }
 
 int main(void) {
