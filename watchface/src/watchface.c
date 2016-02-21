@@ -1,49 +1,82 @@
-#include <pebble.h>
-Window *window;
-TextLayer *text_layer;
+/*
+ * main.c
+ * Sets up the Window, ClickConfigProvider and ClickHandlers.
+ */
 
-void init() {
-  // Create the Window
-  window = window_create();
-  // Push to the stack, animated
-  window_stack_push(window, true);
-  // Create the TextLayer, for display at (0, 0),
-  // and with a size of 144 x 40
-  text_layer = text_layer_create(GRect(0, 0, 144, 40));
-  // Set the text that the TextLayer will display
-  text_layer_set_text(text_layer, "PATETOOO! ");
-  // Add as child layer to be included in rendering
-  layer_add_child(window_get_root_layer(window),
-  text_layer_get_layer(text_layer));
-  window_set_background_color(window, GColorBlack);
-  //Vibrations
-  //Otro
-  int times = 3;
+#include <pebble.h>
+
+static Window *s_main_window;
+static TextLayer *s_output_layer;
+
+/******* Methods ********/
+void vibrations (int times){
   static const uint32_t const segments[] = { 200, 100, 400 };
-  if (times > 0){
-  VibePattern pat = {
-  .durations = segments,
-  .num_segments = ARRAY_LENGTH(segments),
-  };
-  vibes_enqueue_custom_pattern(pat);
-  times --;
+  while (times > 0){
+    VibePattern pat = {
+    .durations = segments,
+    .num_segments = ARRAY_LENGTH(segments),
+    };
+    vibes_enqueue_custom_pattern(pat);
+    times --;
   }
 }
 
-void deinit() {
-  // Destroy the Window
-  window_destroy(window);
-  // Destroy the TextLayer
-  text_layer_destroy(text_layer);
+/******* Controllers **********/
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Up pressed!");
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Select pressed!");
+  vibrations(3);
+}
+
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Down pressed!");
+}
+
+static void click_config_provider(void *context) {
+  // Register the ClickHandlers
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+}
+
+static void main_window_load(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  GRect window_bounds = layer_get_bounds(window_layer);
+
+  // Create output TextLayer
+  s_output_layer = text_layer_create(GRect(5, 0, window_bounds.size.w - 5, window_bounds.size.h));
+  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  text_layer_set_text(s_output_layer, "No button pressed yet.");
+  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));
+}
+
+static void main_window_unload(Window *window) {
+  // Destroy output TextLayer
+  text_layer_destroy(s_output_layer);
+}
+
+static void init() {
+  // Create main Window
+  s_main_window = window_create();
+  window_set_window_handlers(s_main_window, (WindowHandlers) {
+    .load = main_window_load,
+    .unload = main_window_unload
+  });
+  window_set_click_config_provider(s_main_window, click_config_provider);
+  window_stack_push(s_main_window, true);
+}
+
+static void deinit() {
+  // Destroy main Window
+  window_destroy(s_main_window);
 }
 
 int main(void) {
-  // Initialize the app
   init();
-  // Wait for app events
   app_event_loop();
-  // Deinitialize the app
   deinit();
-  // App finished without error
-  return 0;
 }
