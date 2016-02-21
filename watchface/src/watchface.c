@@ -50,6 +50,18 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   }
   else{
     s_uptime = s_uptime;
+
+    // Use a long-lived buffer
+    static char s_uptime_buffer[32];
+
+    // Get time since launch
+    int seconds = s_uptime % 60;
+    int minutes = (s_uptime % 3600) / 60;
+    int hours = s_uptime / 3600;
+
+    // Update the TextLayer
+    snprintf(s_uptime_buffer, sizeof(s_uptime_buffer), "Uptime: %dh %dm %ds", hours, minutes, seconds);
+    text_layer_set_text(s_uptime_layer, s_uptime_buffer);
   }
 }
 
@@ -59,13 +71,27 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Timer Begins");
+  if (b_timeOnOff){
+    b_timeOnOff = false;
+    text_layer_set_text(s_output_layer, "Timer Stopped");
+  }
+  else{
+    b_timeOnOff = true;
+    text_layer_set_text(s_output_layer, "Timer On");
+  }
   //vibrations(3);
-  b_timeOnOff = !b_timeOnOff;
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Down pressed!");
+  if (b_timeOnOff){
+    b_timeOnOff = false;
+    text_layer_set_text(s_output_layer, "Reset!");
+    s_uptime = 0;
+  }
+  else{
+    text_layer_set_text(s_output_layer, "Reset!");
+    s_uptime = 0;
+  }
 }
 
 static void click_config_provider(void *context) {
@@ -82,7 +108,7 @@ static void main_window_load(Window *window) {
   // Create output TextLayer
   s_output_layer = text_layer_create(GRect(5, 0, window_bounds.size.w - 5, window_bounds.size.h));
   text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
-  text_layer_set_text(s_output_layer, "No button pressed yet.");
+  text_layer_set_text(s_output_layer, "Timer On");
   text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_layer, text_layer_get_layer(s_output_layer));
 
