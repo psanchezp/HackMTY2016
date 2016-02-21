@@ -11,6 +11,7 @@ static TextLayer *s_output_layer;
 //Layer de tiempo
 static TextLayer *s_uptime_layer;
 static int s_uptime = 0;
+static bool b_timeOnOff = true;
 
 /******* Methods ********/
 void vibrations (int times){
@@ -26,24 +27,29 @@ void vibrations (int times){
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  // Use a long-lived buffer
-  static char s_uptime_buffer[32];
+  if (b_timeOnOff){  
+    // Use a long-lived buffer
+    static char s_uptime_buffer[32];
 
-  // Get time since launch
-  int seconds = s_uptime % 60;
-  int minutes = (s_uptime % 3600) / 60;
-  int hours = s_uptime / 3600;
+    // Get time since launch
+    int seconds = s_uptime % 60;
+    int minutes = (s_uptime % 3600) / 60;
+    int hours = s_uptime / 3600;
 
-  // Update the TextLayer
-  snprintf(s_uptime_buffer, sizeof(s_uptime_buffer), "Uptime: %dh %dm %ds", hours, minutes, seconds);
-  text_layer_set_text(s_uptime_layer, s_uptime_buffer);
+    // Update the TextLayer
+    snprintf(s_uptime_buffer, sizeof(s_uptime_buffer), "Uptime: %dh %dm %ds", hours, minutes, seconds);
+    text_layer_set_text(s_uptime_layer, s_uptime_buffer);
 
-  // Increment s_uptime
-  s_uptime++;
+    // Increment s_uptime
+    s_uptime++;
 
-  //Uptime Vibration
-  if (seconds%5 == 0){
-    vibrations(3);
+    //Uptime Vibration
+    if (seconds%5 == 0 && seconds!=0){
+      vibrations(3);
+    }
+  }
+  else{
+    s_uptime = s_uptime;
   }
 }
 
@@ -55,7 +61,7 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(s_output_layer, "Timer Begins");
   //vibrations(3);
-  s_uptime = 0;
+  b_timeOnOff = !b_timeOnOff;
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
