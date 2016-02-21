@@ -23,6 +23,7 @@ void init() {
   window_set_background_color(window, GColorBlack);
 
   //Vibrations
+  //Otro
   int times = 3;
   static const uint32_t const segments[] = { 200, 100, 400 };
   if (times > 0){
