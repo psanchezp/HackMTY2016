@@ -4,6 +4,7 @@
  */
 
 #include <pebble.h>
+#include "text_animation_window.h"
 
 static Window *s_main_window;
 static TextLayer *s_output_layer;
@@ -67,7 +68,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 /******* Controllers **********/
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Up pressed!");
+  text_animation_window_push();
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
